@@ -1,0 +1,20 @@
+scalar Date
+
+type Post {
+  id: ID!
+  title: String!
+  content: String!
+  image_link: String!
+  author: String!
+  createdAt: Date!
+}
+
+type Query {
+  posts: [Post!]!
+  getPost(id: String!): Post!
+}
+
+type Mutation {
+  createPost(title: String!, content: String!, image_link: String!, author: String!): Post!
+  deletePost(id: ID!): Post!
+}
