@@ -2,6 +2,8 @@ import uvicorn
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
 
+from image_generator.generate_single_kolam import test_setup 
+
 app = FastAPI()
 
 app.add_middleware(
@@ -18,6 +20,7 @@ def main():
 
 @app.post('/generate-kolam')
 def generateKolam():
+    test_setup(8)
     return { "data": "working sucessfully" }
 
 if __name__ == "__main__":
