@@ -250,11 +250,11 @@ def test_setup():
 
         # Create generator and test
         generator = KolamGenerator(patterns_data)
-        pattern = generator.generate_kolam(16)  # Small test kolam
+        pattern = generator.generate_kolam(50)  # Small test kolam
 
         # Create renderer and test
         renderer = KolamRenderer()
-        renderer.render_to_png(pattern, 'test_kolam.png', width=400, height=400)
+        renderer.render_to_png(pattern, 'test_kolam.png', width=2048, height=2048)
 
         print("✅ Setup test successful! Created test_kolam.png")
         print("🎉 Kolam generator is ready to use!")
