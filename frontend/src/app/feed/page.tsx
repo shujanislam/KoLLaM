@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { gql } from '@apollo/client';
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useState } from "react";
@@ -108,6 +109,20 @@ export default function FeedPage() {
               <h3 className="font-semibold">{post.title}</h3>
               <p className="text-sm text-gray-600">By {post.author}</p>
               <p className="text-xs text-gray-400">{post.createdAt}</p>
+
+              <div className="mt-2">
+                <Image
+                  src={
+                    post.image_link?.startsWith("http")
+                      ? post.image_link
+                      : "/fallback.jpg" // put a fallback image inside /public/
+                  }
+                  alt={post.title}
+                  width={600}
+                  height={400}
+                  className="rounded"
+                />
+              </div>
             </li>
           ))}
         </ul>
