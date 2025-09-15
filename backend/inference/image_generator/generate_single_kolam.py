@@ -31,6 +31,8 @@ def test_setup(size):
         output_path = os.path.join(output_dir, "ayan.png")
         renderer.render_to_png(pattern, output_path, width=size * 128, height=size * 128) #appropriate resolution for the respective size
 
+        return output_path
+
     except Exception as e:
         print(f"❌ Setup test failed: {e}")
         print("Please check that all required dependencies are installed:")

@@ -1,29 +1,33 @@
-'use client';
+"use client";
+import { useState } from "react";
 
-export default function Generate() {
-  const generateKolam = async() => {
-    try{
-      const res = await fetch("http://localhost:8081/generate-kolam", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+export default function KolamGenerator() {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
-      if(res.ok){
-        const data = await res.json();
+  const handleGenerate = async () => {
+    const res = await fetch("http://localhost:8081/generate-kolam", {
+      method: "POST",
+    });
 
-        console.log(data);
-      }
-    }
-    catch(err){
-      console.log(err.message);
-    }
-  }
-  
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    setImageUrl(url);
+  };
+
   return (
-  <div>
-    <button onClick={generateKolam}>Generate Kolam</button>
-  </div>
+    <div className="p-4">
+      <button 
+        onClick={handleGenerate} 
+        className="bg-green-500 text-white px-4 py-2 rounded"
+      >
+        Generate Kolam
+      </button>
+
+      {imageUrl && (
+        <div className="mt-4">
+          <img src={imageUrl} alt="Generated Kolam" className="rounded shadow" />
+        </div>
+      )}
+    </div>
   );
 }
