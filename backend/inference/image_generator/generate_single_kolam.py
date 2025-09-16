@@ -1,48 +1,56 @@
 #!/usr/bin/env python3
 """
-Setup script for Kolam Generator
-Sets up the kolamPatternsData.json file from your existing data.
+Single Kolam Generator - Generate individual kolam patterns
 """
+
 import os
+from kolam_generator import KolamGenerator
+from kolam_renderer import KolamRenderer, ColorPalettes
 
-BASE_DIR = os.path.dirname(__file__)  # folder of generate_single_kolam.py
-JSON_PATH = os.path.join(BASE_DIR, "kolamPatternsData.json")
+def generate_single_kolam(json_path: str, size: int, theme: str = 'classic',
+                         output_filename: str = None, width: int = 800,
+                         height: int = 800) -> str:
+    """
+    Generate a single kolam image
 
-output_dir = os.path.join(os.path.dirname(__file__), "renderedImage")
-os.makedirs(output_dir, exist_ok=True)
+    Args:
+        json_path: Path to kolamPatternsData.json
+        size: Size of kolam (3-15)
+        theme: Color theme name
+        output_filename: Output filename (auto-generated if None)
+        width: Image width in pixels
+        height: Image height in pixels
 
-def test_setup(size):
-    try:
-        from .kolam_generator import KolamGenerator
-        from .kolam_renderer import KolamRenderer
-        import json
+    Returns:
+        Path to generated image
+    """
+    generator = KolamGenerator(json_path)
+    renderer = KolamRenderer()
 
-        # Load pattern data
-        with open(JSON_PATH, 'r') as f:
-            data = json.load(f)
-            patterns_data = data['patterns']
+    pattern = generator.generate_kolam(size)
+    color_scheme = ColorPalettes.get_theme(theme)
 
-        # Create generator and test
-        generator = KolamGenerator(patterns_data)
-        pattern = generator.generate_kolam(size)
+    if not output_filename:
+        output_filename = f"kolam_size{size}_{theme}.png"
 
-        # Create renderer and test
-        renderer = KolamRenderer()
-        output_path = os.path.join(output_dir, "ayan.png")
-        renderer.render_to_png(pattern, output_path, width=size * 128, height=size * 128) #appropriate resolution for the respective size
+    renderer.render_to_png(pattern, output_filename, color_scheme, width, height)
 
-        return output_path
-
-    except Exception as e:
-        print(f"❌ Setup test failed: {e}")
-        print("Please check that all required dependencies are installed:")
-        print("  pip install matplotlib numpy")
-        return False
-
-    return True
+    return output_filename
 
 def main():
-    test_setup(16)
+    """Generate a single kolam with default parameters"""
+    json_path = "kolamPatternsData.json"
+
+    if not os.path.exists(json_path):
+        return None
+
+    output_dir = "renderedImage"
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_path = os.path.join(output_dir, "single_kolam.png")
+    generated_file = generate_single_kolam(json_path, 7, 'classic', output_path)
+
+    return generated_file
 
 if __name__ == "__main__":
     main()
