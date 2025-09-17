@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 import useAuth from "@/hooks/useAuth";
 
 export default function AuthPage() {
@@ -11,6 +12,7 @@ export default function AuthPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +42,7 @@ export default function AuthPage() {
           }
         } else {
           setSuccess("Sign in successful! Welcome back.");
-          
+          router.push('/feed');
           setEmail("");
           setPassword("");
         }
