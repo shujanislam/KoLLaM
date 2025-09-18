@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from sklearn.model_selection import train_test_split
 
 # --- Dataset Class ---
-class ValidationDataset(Dataset):
+class KolamDataset(Dataset):
     def __init__(self, image_dir, transform=None, csv_data=None):
         self.image_dir = image_dir
         self.transform = transform
@@ -22,22 +22,28 @@ class ValidationDataset(Dataset):
     def __getitem__(self, idx):
         image_path = self.image_paths[idx]
         label = self.labels[idx]
+
+        # Force convert to RGB (fixes transparency/palette warnings)
         image = Image.open(image_path).convert("RGB")
+
         if self.transform:
             image = self.transform(image)
+
         return image, label
 
+
 # --- Model ---
-class ValidationChecker(nn.Module):
+class GeneralKolamClassifier(nn.Module):
     def __init__(self):
-        super(ValidationChecker, self).__init__()
+        super(GeneralKolamClassifier, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, 3, padding=1)
         self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
         self.pool = nn.MaxPool2d(2, 2)
         self.dropout = nn.Dropout(0.25)
 
+        # 224 -> 112 -> 56
         self.fc1 = nn.Linear(64 * 56 * 56, 128)
-        self.fc2 = nn.Linear(128, 2)  # Binary (Valid=0, Invalid=1)
+        self.fc2 = nn.Linear(128, 2)  # Binary (Non-kolam=0, Kolam=1)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -64,27 +70,32 @@ def clean_labels(df):
 
 # --- Main ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Using device:", device)
 
 if __name__ == "__main__":
-    image_dir = "./dataset/images"  # <-- placeholder
-    csv_path = "./dataset/kolam_validity_labels.csv"  # <-- placeholder
+    print("Using device:", device)
+
+    image_dir = "./dataset/general_classifier"
+    csv_path = "./dataset/general_label.csv"
 
     df = pd.read_csv(csv_path)
     df = clean_labels(df)
 
     # --- 80-20 Split ---
-    train_df, test_df = train_test_split(df, test_size=0.2,
-                                         stratify=df['label'],
-                                         random_state=42)
+    train_df, test_df = train_test_split(
+        df, test_size=0.2,
+        stratify=df['label'],
+        random_state=42
+    )
 
-    train_dataset = ValidationDataset(image_dir, transform, train_df)
-    test_dataset = ValidationDataset(image_dir, transform, test_df)
+    train_dataset = KolamDataset(image_dir, transform, train_df)
+    test_dataset = KolamDataset(image_dir, transform, test_df)
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4, pin_memory=True)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True,
+                              num_workers=4, pin_memory=True)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False,
+                             num_workers=4, pin_memory=True)
 
-    model = ValidationChecker().to(device)
+    model = GeneralKolamClassifier().to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -134,7 +145,22 @@ if __name__ == "__main__":
 
         if test_acc > best_acc:
             best_acc = test_acc
-            torch.save(model.state_dict(), "best_validation_checker.pth")
+            torch.save(model.state_dict(), "./saved_models/best_general_classifier.pth")
             print(f"✅ Saved new best model with acc {best_acc:.2f}%")
 
     print("✅ Training finished")
+
+    # --- Prediction Function ---
+def PredictImage(image_path):
+    model = GeneralKolamClassifier().to(device)
+    model.load_state_dict(torch.load("./saved_models/best_general_classifier.pth", map_location=device))
+    model.eval()
+    with torch.no_grad():
+        image = Image.open(image_path).convert("RGB")
+        image = transform(image).unsqueeze(0).to(device)
+
+        output = model(image)
+        probs = F.softmax(output, dim=1)  # [batch, 2]
+        prob_tb = probs[0][1].item()      # probability for Kolam (class 1)
+
+        return prob_tb

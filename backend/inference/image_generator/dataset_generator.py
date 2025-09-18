@@ -119,8 +119,8 @@ def main():
     results = dataset_gen.generate_complete_dataset(
         output_dir="dataset",
         sizes=[3, 5, 7, 9, 11, 13],  # Smaller range for faster generation
-        valid_per_size=10,
-        invalid_per_size=10
+        valid_per_size=64,
+        invalid_per_size=32
     )
 
     return results
