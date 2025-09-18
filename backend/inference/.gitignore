@@ -1,2 +1,26 @@
-__pycache__/ 
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
 venv/
+env/
+.venv/
+pytorch_env/
+model-dev/
+
+# Ignore Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Ignore model checkpoints (large)
+*.pt
+*.pth
+*.onnx
+
+# Ignore data
+data/
+datasets/
+dataset/
+Dataset/
