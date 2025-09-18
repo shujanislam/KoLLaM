@@ -5,6 +5,7 @@ import { gql } from '@apollo/client';
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Navbar from '../components/Navbar.tsx';
 
 // --- GraphQL Queries/Mutations ---
 const GET_POSTS = gql`
@@ -61,6 +62,8 @@ export default function FeedPage() {
   };
 
   return (
+<>
+  <Navbar />
 <div className="max-w-5xl mx-auto p-6">
       {/* --- Create Post Form --- */}
       <motion.div
@@ -157,5 +160,6 @@ export default function FeedPage() {
         </motion.ul>
       )}
     </div>
+</>
   );
 }

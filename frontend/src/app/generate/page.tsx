@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Navbar from '../components/Navbar.tsx';
 
 export default function KolamGenerator() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -26,6 +27,8 @@ export default function KolamGenerator() {
   };
 
   return (
+<>
+  <Navbar />
 <div className="min-h-screen bg-gradient-to-b from-white via-purple-50 to-pink-50 flex flex-col items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -71,5 +74,6 @@ export default function KolamGenerator() {
         )}
       </motion.div>
     </div>
+  </>
   );
 }

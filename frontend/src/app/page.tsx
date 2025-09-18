@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import Navbar from './components/Navbar.tsx';
 
 export default function Home() {
   return (
+  <>
+    <Navbar />
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-purple-100 via-white to-pink-100 p-6">
       {/* Hero Section */}
       <motion.div
@@ -66,5 +69,6 @@ export default function Home() {
         </div>
       </motion.div>
     </main>
+    </>
   );
 }
