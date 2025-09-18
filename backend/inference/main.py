@@ -1,12 +1,11 @@
 import uvicorn
 import shutil
 import os
-import torch
-import evaluation_model.test
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from image_generator.generate_single_kolam import test_setup
+from evaluation_model.test import test_prediction
 
 app = FastAPI()
 
@@ -23,18 +22,20 @@ def main():
     return { "data": "json bhai" }
 
 @app.post('/generate-kolam')
-def generateKolam():
-    output_path = test_setup(8)
+async def generateKolam(request: Request):
+    body = await request.json()
+    size = body.get("size", 8)
+    output_path = test_setup(size)
     return FileResponse(output_path, media_type="image/png", filename="ayan.png")
 
 @app.post("/evaluate-kolam", status_code=200)
-async def evaluateKolam(file: UploadFile = File(...)):
+async def upload_image(file: UploadFile = File(...)):
     try:
         file_location = f"temp_{file.filename}"
         with open(file_location, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
-        prob = evaluation_model.test.test_prediction(file_location)
+        prob = test_prediction(file_location)
 
         os.remove(file_location)
 
