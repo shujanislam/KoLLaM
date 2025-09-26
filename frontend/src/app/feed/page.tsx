@@ -14,6 +14,7 @@ const GET_POSTS = gql`
     posts {
       id
       title
+      image_link
       author
       createdAt
       reactions
@@ -116,6 +117,7 @@ export default function FeedPage() {
               onClick={() => setShowModal(false)}
               aria-label="Close"
             >
+
               
             </button>
             <h2 className="text-xl font-bold text-black mb-4">Create New Post</h2>
@@ -173,6 +175,7 @@ export default function FeedPage() {
               <div className="flex items-center gap-2 mb-1">
                 <a href={`/posts/${post.id}`} className="text-lg font-bold text-gray-900 hover:underline truncate flex-1">{post.title || "Photo Post"}</a>
                 <span className="text-xs text-gray-400">By {post.author}</span>
+
               </div>
               {post.image_link && (
                 <div className="w-full flex justify-center items-center">
