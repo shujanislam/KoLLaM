@@ -18,7 +18,7 @@ const GET_POSTS = gql`
       createdAt
       reactions
       comments
-      imageLink
+      image_link
     }
   }
 `;
@@ -48,14 +48,9 @@ export default function FeedPage() {
   const [imageLink, setImageLink] = useState("");
   const [content, setContent] = useState("");
   //const [author, setAuthor] = useState(""); can get from user profile
-  const [text, setText] = useState("");
   const [showModal, setShowModal] = useState(false);
-  /////////////////
-  
-  
   const [photo, setPhoto] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  ////////////////
   const { data, loading: loadingPosts, error: errorPosts } = useQuery<GetPostsData>(GET_POSTS);
   const [createPost, { loading: creating, error: errorCreate }] = useMutation(CREATE_POST, {
     refetchQueries: [{ query: GET_POSTS }],
@@ -64,13 +59,19 @@ export default function FeedPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await createPost({
-      variables: { title, image_link: imageLink, content},
+      variables: { 
+        title: title || "Photo Post", 
+        image_link: imageLink, 
+        content: content,
+        author: "Anonymous" //get from user profile
+      },
     });
     setShowModal(false);
     setTitle("");
-    setText("");
-    setImageLink("");
     setContent("");
+    setImageLink("");
+    setPhotoPreview(null);
+    setPhoto(null);
   };
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -83,16 +84,17 @@ export default function FeedPage() {
     } else {
       setPhoto(null);
       setPhotoPreview(null);
+      setImageLink("");
     }
   }
 
-  if (loadingPosts) {
+  /* if (loadingPosts) {
     return <p>Loading posts...</p>;
   }
 
   if (errorPosts) {
     return <p className="text-red-500">{errorPosts.message}</p>;
-  }
+  } */
 
   return (
     <div className="flex flex-col gap-4 bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen p-2 sm:p-4 rounded-2xl">
@@ -114,15 +116,21 @@ export default function FeedPage() {
               onClick={() => setShowModal(false)}
               aria-label="Close"
             >
-            
+              
             </button>
             <h2 className="text-xl font-bold text-black mb-4">Create New Post</h2>
             <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              <input
+                className="border rounded px-2 py-1 text-black"
+                placeholder="Post title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
               <textarea
                 className="border rounded px-2 py-1 min-h-[80px] text-black"
                 placeholder="Write something..."
-                value={text}
-                onChange={(e) => setText(e.target.value)}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
               />
               <input
                 className="text-black"
@@ -136,7 +144,7 @@ export default function FeedPage() {
               <button
                 type="submit"
                 className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
-                disabled={!text && !photoPreview}
+                disabled={!content && !photoPreview}
               >
                 Post
               </button>
@@ -166,13 +174,16 @@ export default function FeedPage() {
                 <a href={`/posts/${post.id}`} className="text-lg font-bold text-gray-900 hover:underline truncate flex-1">{post.title || "Photo Post"}</a>
                 <span className="text-xs text-gray-400">By {post.author}</span>
               </div>
-              {post.imageLink && (
+              {post.image_link && (
                 <div className="w-full flex justify-center items-center">
-                  <Image src={
-                    post.imageLink?.startsWith("http")
-                      ? post.imageLink
-                      : "/fallback.jpg"}
-                       alt={post.title} className="rounded-md border border-gray-200 shadow-sm w-full h-auto max-h-[400px] object-contain bg-gray-100" style={{maxWidth:'100%'}} />
+                  <Image 
+                    src={post.image_link?.startsWith("http") ? post.image_link : "/fallback.jpg"}
+                    alt={post.title || "Post image"} 
+                    width={400}
+                    height={400}
+                    className="rounded-md border border-gray-200 shadow-sm w-full h-auto max-h-[400px] object-contain bg-gray-100" 
+                    style={{maxWidth:'100%'}} 
+                  />
                 </div>
               )}
             </div>

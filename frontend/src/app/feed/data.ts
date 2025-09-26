@@ -3,7 +3,7 @@ export type Post = {
   author: string;
   title: string;
   createdAt: string;
-  imageLink?: string;
+  image_link?: string;
   reactions: number;
   comments: { id: string;authorId: string; authorName: string; text: string }[];
 };
