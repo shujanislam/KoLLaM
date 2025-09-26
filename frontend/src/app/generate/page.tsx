@@ -6,30 +6,53 @@ import Navbar from '../components/Navbar.tsx';
 export default function KolamGenerator() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [size, setSize] = useState<number>(8); // default value
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleGenerate = async () => {
-    const res = await fetch("http://localhost:8081/generate-kolam", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ size }), // send size to backend
-    });
-
-    if (!res.ok) {
-      console.error("Error generating kolam:", await res.text());
+    if (size < 2 || size > 50) {
+      alert("Size must be between 2 and 50");
       return;
     }
 
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    setImageUrl(url);
+    setLoading(true);
+    setImageUrl(null); // reset previous image
+
+    try {
+      const res = await fetch("http://localhost:8081/generate-kolam", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ size }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("Error generating kolam:", text);
+        alert("Failed to generate kolam: " + text);
+        return;
+      }
+
+      const blob = await res.blob();
+      if (!blob.size) {
+        alert("No image returned from backend");
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      setImageUrl(url);
+    } catch (err) {
+      console.error("Error fetching Kolam:", err);
+      alert("Something went wrong while generating Kolam.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-<>
-  <Navbar />
-<div className="min-h-screen bg-gradient-to-b from-white via-purple-50 to-pink-50 flex flex-col items-center justify-center p-6">
+  <>
+    <Navbar />
+    <div className="min-h-screen bg-gradient-to-b from-white via-purple-50 to-pink-50 flex flex-col items-center justify-center p-6">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,9 +75,12 @@ export default function KolamGenerator() {
           />
           <button
             onClick={handleGenerate}
-            className="bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-6 py-2 rounded-xl shadow-lg hover:scale-105 transition-transform"
+            disabled={loading}
+            className={`bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold px-6 py-2 rounded-xl shadow-lg transition-transform ${
+              loading ? "opacity-50 cursor-not-allowed" : "hover:scale-105"
+            }`}
           >
-            Generate
+            {loading ? "Generating..." : "Generate"}
           </button>
         </div>
 

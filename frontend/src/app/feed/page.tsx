@@ -13,6 +13,7 @@ const GET_POSTS = gql`
     posts {
       id
       title
+      image_link
       author
       createdAt
     }
@@ -141,7 +142,6 @@ export default function FeedPage() {
               </h3>
               <p className="text-sm text-gray-500 mb-1">By {post.author}</p>
               <p className="text-xs text-gray-400 mb-4">{post.createdAt}</p>
-
               <div className="mt-2 rounded-lg overflow-hidden">
                 <Image
                   src={
