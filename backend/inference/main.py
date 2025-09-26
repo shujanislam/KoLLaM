@@ -33,21 +33,15 @@ def root():
 
 @app.post("/generate-kolam")
 async def generate_kolam(request: Request):
-    """
-    Receive JSON body like: { "size": 8 }
-    Call the main test_setup function and return generated PNG
-    """
+    data = await request.json()
+    size = data.get("size", 8)
+    theme = data.get("theme", "classic")  # just forward it
+
+    if not isinstance(size, int) or size < 2 or size > 50:
+        raise HTTPException(status_code=400, detail="Size must be 2-50")
+
     try:
-        data = await request.json()
-        size = data.get("size", 8)
-        if not isinstance(size, int) or size < 2 or size > 50:
-            raise HTTPException(status_code=400, detail="Size must be an integer between 2 and 50")
-
-        print(f"Generating kolam with size={size}...")
-
-        # Call test_setup directly
-        output_path = test_setup(size)
-
+        output_path = test_setup(size, theme)  # pass theme to test_setup
         if not output_path or not os.path.isfile(output_path):
             raise HTTPException(status_code=500, detail="Kolam generation failed")
 
@@ -55,16 +49,10 @@ async def generate_kolam(request: Request):
             output_path,
             media_type="image/png",
             filename="kolam.png",
-            headers={
-                "Access-Control-Allow-Origin": "*",
-                "Cache-Control": "no-cache"
-            }
+            headers={"Access-Control-Allow-Origin": "*", "Cache-Control": "no-cache"},
         )
-
     except Exception as e:
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
 @app.get("/health")
 def health_check():
