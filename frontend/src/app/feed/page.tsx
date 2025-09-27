@@ -65,7 +65,7 @@ export default function FeedPage() {
   return (
 <>
   <Navbar />
-<div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-6 mt-24">
       {/* --- Create Post Form --- */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -74,7 +74,7 @@ export default function FeedPage() {
         className="bg-white p-6 rounded-2xl shadow-xl mb-10"
       >
         <h1 className="text-3xl font-extrabold text-purple-700 mb-6">
-          ✍️ Create New Post
+          Create New Post
         </h1>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
